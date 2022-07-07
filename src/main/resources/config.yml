@@ -1,0 +1,25 @@
+# ----------------------------------------------------------------------------------------------------------------------
+# Commands
+
+# Donate: Provides a target x amount of health, subtracting x health from the user.
+# - All players can use this by command default.
+donate-command: true
+# Health: Returns, adds to, removes from, or sets the target user's health.
+# - Only OP users can use this by command default.
+health-command: true
+# Revive: Makes an eliminated target alive and provides them with x amount of health if provided.
+# - Only OP users can use this command by default.
+revive-command: true
+# Withdraw: Takes one heart from the user and converts it to an item that can be used to get it back.
+# - All players can use this command by default.
+withdrawal-command: true
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Events
+
+# If disabled, players will not automatically gain health upon killing another player.
+# Instead, players will drop a heart upon death by another player that can be used.
+automatic-health: true
+# If enabled, hearts will be allowed inside of ender chests.
+# Disabled by default to prevent inaccessible items in raids/battles.
+allow-ender-hearts: false

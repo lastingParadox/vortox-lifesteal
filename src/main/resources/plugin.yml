@@ -1,0 +1,39 @@
+name: VortoxLifeSteal
+version: '${project.version}'
+main: live.vortox.vortoxlifesteal.VortoxLifeSteal
+api-version: 1.19
+authors: [ Zanr ]
+description: Lifesteal Test
+website: http://vortox.live
+
+commands:
+  donate:
+    description: Give hearts to another player.
+    usage: /<command> <player> <integer>
+    permission: vortoxlifesteal.donate
+  health:
+    description: Get hearts.
+    usage: /<command> <player> [add|set] [value]
+    permission: vortoxlifesteal.health
+  revive:
+    description: Revives a player and gives them health if provided.
+    usage: /<command> <player> <integer>
+    permission: vortoxlifesteal.revive
+  withdraw:
+    description: Withdraws hearts from the player's life.
+    usage: /<command> <integer>
+    permission: vortoxlifesteal.withdraw
+
+permissions:
+  vortoxlifesteal.donate:
+    description: Allows donate command
+    default: true
+  vortoxlifesteal.health:
+    description: Allows health command
+    default: op
+  vortoxlifesteal.revive:
+    description: Allows revive command
+    default: op
+  vortoxlifesteal.withdraw:
+    description: Allows withdraw command
+    default: true
