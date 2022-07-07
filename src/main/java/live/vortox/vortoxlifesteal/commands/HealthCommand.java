@@ -50,7 +50,7 @@ public class HealthCommand implements CommandExecutor {
                     }
 
                     int amount;
-                    String provided = args[1];
+                    String provided = args[2];
 
                     try {
                         amount = Integer.parseInt(provided) * 2;
@@ -63,9 +63,9 @@ public class HealthCommand implements CommandExecutor {
                     target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(targetMax + amount);
 
                     if (amount < 0)
-                        player.sendMessage(ChatColor.GREEN + "Removed " + amount + " hearts from " + target.getName() + ".");
+                        player.sendMessage(ChatColor.GREEN + "Removed " + amount/2 + " hearts from " + target.getName() + ".");
                     else
-                        player.sendMessage(ChatColor.GREEN + "Gave " + amount + " hearts to " + target.getName() + ".");
+                        player.sendMessage(ChatColor.GREEN + "Gave " + amount/2 + " hearts to " + target.getName() + ".");
 
                 }
                 else {

@@ -16,6 +16,9 @@ public class WithdrawalCommand implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             double health = player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+            if (health == 2) {
+                player.sendMessage(ChatColor.RED + "You don't have enough health to withdraw!");
+            }
             player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health - 2);
             player.getInventory().addItem(ItemManager.heart);
             player.sendMessage(ChatColor.DARK_PURPLE + "You remove a heart from your health pool...");
