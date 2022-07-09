@@ -17,11 +17,11 @@ commands:
     permission: vortoxlifesteal.health
   revive:
     description: Revives a player and gives them health if provided.
-    usage: /<command> <player> <integer>
+    usage: /<command> <player> [integer]
     permission: vortoxlifesteal.revive
   withdraw:
     description: Withdraws hearts from the player's life.
-    usage: /<command> <integer>
+    usage: /<command> [integer]
     permission: vortoxlifesteal.withdraw
 
 permissions:

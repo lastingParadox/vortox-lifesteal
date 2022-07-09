@@ -1,14 +1,27 @@
 package live.vortox.vortoxlifesteal.commands;
 
+import live.vortox.vortoxlifesteal.VortoxLifeSteal;
+import live.vortox.vortoxlifesteal.utils.ElimUtil;
+import live.vortox.vortoxlifesteal.utils.StorageUtil;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
+
 public class HealthCommand implements CommandExecutor {
+
+    private final VortoxLifeSteal plugin;
+
+    public HealthCommand(VortoxLifeSteal plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -60,13 +73,45 @@ public class HealthCommand implements CommandExecutor {
                         return true;
                     }
 
-                    target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(targetMax + amount);
+                    if (args[1].equals("add")) {
+                        target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(targetMax + amount);
 
-                    if (amount < 0)
-                        player.sendMessage(ChatColor.GREEN + "Removed " + amount/2 + " hearts from " + target.getName() + ".");
-                    else
-                        player.sendMessage(ChatColor.GREEN + "Gave " + amount/2 + " hearts to " + target.getName() + ".");
+                        try {
+                            StorageUtil.updatePlayer(target, "hearts", String.valueOf((targetMax + amount)/2));
+                        } catch (IOException e) {
+                            Bukkit.getLogger().warning("Unable to update " + target.getName() + " hearts in storage.");
+                        }
 
+                        if (amount < 0)
+                            player.sendMessage(ChatColor.GREEN + "Removed " + amount/2 + " hearts from " + target.getName() + ".");
+                        else
+                            player.sendMessage(ChatColor.GREEN + "Gave " + amount/2 + " hearts to " + target.getName() + ".");
+
+                        if (targetMax + amount == 0) {
+                            ElimUtil.eliminatePlayer(target);
+                        }
+                    }
+
+                    else {
+                        if (amount < 0) {
+                            player.sendMessage(ChatColor.RED + "You cannot set negative health!");
+                            return true;
+                        }
+
+                        target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(amount);
+
+                        try {
+                            StorageUtil.updatePlayer(target, "hearts", String.valueOf((amount)/2));
+                        } catch (IOException e) {
+                            Bukkit.getLogger().warning("Unable to update " + target.getName() + " hearts in storage.");
+                        }
+
+                        player.sendMessage(ChatColor.GREEN + "Set " + target.getName() + "'s hearts to " + amount/2 + ".");
+
+                        if (amount == 0) {
+                            ElimUtil.eliminatePlayer(target);
+                        }
+                    }
                 }
                 else {
                     player.sendMessage(ChatColor.RED + "Invalid command" + args[1] + "!");

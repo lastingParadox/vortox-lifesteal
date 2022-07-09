@@ -1,30 +1,36 @@
 package live.vortox.vortoxlifesteal;
 
-import live.vortox.vortoxlifesteal.commands.HealthCommand;
-import live.vortox.vortoxlifesteal.commands.DonateCommand;
-import live.vortox.vortoxlifesteal.commands.ReviveCommand;
-import live.vortox.vortoxlifesteal.commands.WithdrawalCommand;
+import live.vortox.vortoxlifesteal.commands.*;
 import live.vortox.vortoxlifesteal.items.ItemManager;
-import live.vortox.vortoxlifesteal.listeners.HeartUseListener;
-import live.vortox.vortoxlifesteal.listeners.PlayerDeathListener;
-import live.vortox.vortoxlifesteal.listeners.PreventHeartEnderListener;
+import live.vortox.vortoxlifesteal.listeners.*;
+
+import live.vortox.vortoxlifesteal.utils.ElimUtil;
+import live.vortox.vortoxlifesteal.utils.StorageUtil;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 public final class VortoxLifeSteal extends JavaPlugin implements Listener {
 
     private final Logger log = getLogger();
+    private static VortoxLifeSteal plugin;
 
     @Override
     public void onEnable() {
+        plugin = this;
         // Plugin startup logic
         log.info("Started!");
 
         this.getConfig().options().copyDefaults();
         this.saveDefaultConfig();
 
+        ElimUtil.plugin = this;
+
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(this), this);
         if (this.getConfig().getBoolean("automatic-health"))
             log.info("Automatic health enabled!");
@@ -39,22 +45,26 @@ public final class VortoxLifeSteal extends JavaPlugin implements Listener {
         } else
             log.info("Hearts in ender chests enabled!");
 
-
         if (this.getConfig().getBoolean("donate-command"))
             this.getCommand("donate").setExecutor(new DonateCommand());
         if (this.getConfig().getBoolean("health-command"))
-            this.getCommand("health").setExecutor(new HealthCommand());
+            this.getCommand("health").setExecutor(new HealthCommand(this));
         if (this.getConfig().getBoolean("revive-command"))
-            this.getCommand("revive").setExecutor(new ReviveCommand());
+            this.getCommand("revive").setExecutor(new ReviveCommand(this));
         if (this.getConfig().getBoolean("withdrawal-command"))
             this.getCommand("withdraw").setExecutor(new WithdrawalCommand());
 
         ItemManager.init();
 
+        StorageUtil.createFile("players.json");
     }
 
     @Override
     public void onDisable() {
         log.info("Ended!");
+    }
+
+    public static Plugin getPlugin() {
+        return plugin;
     }
 }

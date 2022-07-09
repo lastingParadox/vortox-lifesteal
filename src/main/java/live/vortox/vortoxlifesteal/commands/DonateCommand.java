@@ -1,5 +1,8 @@
 package live.vortox.vortoxlifesteal.commands;
 
+import live.vortox.vortoxlifesteal.VortoxLifeSteal;
+import live.vortox.vortoxlifesteal.utils.ElimUtil;
+import live.vortox.vortoxlifesteal.utils.StorageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -9,7 +12,15 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
+
 public class DonateCommand implements CommandExecutor {
+
+    private final VortoxLifeSteal plugin;
+
+    public DonateCommand(VortoxLifeSteal plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -61,18 +72,29 @@ public class DonateCommand implements CommandExecutor {
                 //Subtract from player, add to target.
                 player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(max - amount);
 
+                try {
+                    StorageUtil.updatePlayer(player, "hearts", String.valueOf((max - amount)/2));
+                } catch (IOException e) {
+                    Bukkit.getLogger().warning("Unable to update " + player.getName() + " hearts in storage.");
+                }
+
                 double targetMax = target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
 
-                target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(targetMax + amount);
+                if (targetMax <= 0) {
+                    ElimUtil.revivePlayer(target, amount);
+                }
+                else {
+                    target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(targetMax + amount);
+
+                    try {
+                        StorageUtil.updatePlayer(target, "hearts", String.valueOf((targetMax + amount)/2));
+                    } catch (IOException e) {
+                        Bukkit.getLogger().warning("Unable to update " + target.getName() + " hearts in storage.");
+                    }
+                }
 
                 player.sendMessage(ChatColor.GREEN + "You successfully gave " + amount/2 + " hearts to " + target.getName() + "!");
                 target.sendMessage(ChatColor.GREEN + "You received " + amount/2 + " hearts from " + player.getName() + "!");
-
-                //If target was previously dead, revive them.
-                if (targetMax == 0) {
-                    target.setGameMode(GameMode.SURVIVAL);
-                    target.sendMessage(ChatColor.GREEN + player.getName() + " has revived you! You are now in survival.");
-                }
             }
         }
         return true;

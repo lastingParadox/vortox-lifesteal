@@ -1,62 +1,93 @@
 package live.vortox.vortoxlifesteal.commands;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
+import live.vortox.vortoxlifesteal.VortoxLifeSteal;
+import live.vortox.vortoxlifesteal.utils.ElimUtil;
+import live.vortox.vortoxlifesteal.utils.PlayerStorage;
+import live.vortox.vortoxlifesteal.utils.StorageUtil;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
+
 public class ReviveCommand implements CommandExecutor {
+
+    private final VortoxLifeSteal plugin;
+
+    public ReviveCommand(VortoxLifeSteal plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
-            final String example = ChatColor.RED + "Example: /donate <player> <integer>";
+            final String example = ChatColor.RED + "Example: /revive <player> [integer]";
             Player player = (Player) sender;
 
             if (args.length == 0) {
                 player.sendMessage(ChatColor.RED + "You need to provide the player to revive!");
                 player.sendMessage(example);
-            }
 
+            }
             else {
-                Player target = Bukkit.getPlayerExact(args[0]);
-                if (target == null) {
-                    player.sendMessage(ChatColor.RED + "Player " + args[0] + " does not exist or is not online!");
-                    return true;
+                String eliminationType = plugin.getConfig().getString("elimination-type");
+
+                double amount = 0;
+                if (args.length >= 2) {
+                    try {
+                        amount = Math.abs(Integer.parseInt(args[1]));
+                    } catch (NumberFormatException e) {
+                        player.sendMessage(ChatColor.RED + args[1] + " is not an integer amount of hearts!");
+                        return true;
+                    }
                 }
-                double targetMax = target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-                if (targetMax > 0) {
-                    if (target == player)
-                        player.sendMessage(ChatColor.RED + " You cannot be revived, you are alive!");
-                    else
-                        player.sendMessage(ChatColor.RED + target.getName() + " cannot be revived, they are alive!");
-                    return true;
+
+                if (eliminationType.equalsIgnoreCase("spectator")) {
+
+                    Player target = Bukkit.getPlayerExact(args[0]);
+
+                    if (target == null) {
+                        player.sendMessage(ChatColor.RED + "Player " + args[0] + " does not exist or is not online!");
+                        return true;
+                    } else if (target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() > 0) {
+                        player.sendMessage(ChatColor.RED + target.getName() + " cannot be revived, as they are not eliminated!");
+                    }
+
+                    ElimUtil.revivePlayer(target, amount);
+
+                    player.sendMessage(ChatColor.GREEN + "Revived " + target.getName() + " with "
+                            + (amount > 0 ? (int) amount + " hearts!" : "1 heart!"));
                 }
                 else {
-                    if (args[1] != null) {
-                        int amount;
-                        try {
-                            amount = Math.abs(Integer.parseInt(args[1]));
-                            amount *= 2;
-                        } catch (NumberFormatException e) {
-                            player.sendMessage(ChatColor.RED + "Amount provided is not an integer number of hearts.");
-                            player.sendMessage(example);
+                    OfflinePlayer target;
+                    try {
+                        PlayerStorage temp = StorageUtil.findPlayer(StorageUtil.returnPlayerList(), args[0]);
+
+                        if (temp == null) {
+                            player.sendMessage(ChatColor.RED + "The provided player does not exist!");
                             return true;
                         }
-                        target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(amount);
+
+                        target = Bukkit.getOfflinePlayer(temp.getUuid());
+
+                    } catch (IOException e) {
+                        player.sendMessage(ChatColor.RED + "An internal server error occurred when trying to execute this command.");
+                        Bukkit.getLogger().warning("Unable to access player storage.");
+                        return true;
                     }
-                    else
-                        target.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(2);
 
-                    target.setGameMode(GameMode.SURVIVAL);
-                    target.sendMessage(ChatColor.GREEN + "You have been revived! You are now in survival.");
+                    ElimUtil.revivePlayer(target, amount);
+
+                    player.sendMessage(ChatColor.GREEN + "Revived " + target.getName() + " with "
+                            + (amount > 0 ? (int) amount + " hearts!" : "1 heart!"));
                 }
-
             }
         }
         return true;
     }
+
 }
+
