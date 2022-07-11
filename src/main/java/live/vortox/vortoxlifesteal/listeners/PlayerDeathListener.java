@@ -4,8 +4,6 @@ import live.vortox.vortoxlifesteal.VortoxLifeSteal;
 import live.vortox.vortoxlifesteal.items.ItemManager;
 import live.vortox.vortoxlifesteal.utils.ElimUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,6 +38,7 @@ public class PlayerDeathListener implements Listener {
 
             //In the case the player is at 0 max hp
             if (player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() <= 0) {
+
                 ElimUtil.eliminatePlayer(player);
             }
         } catch (NullPointerException e) {

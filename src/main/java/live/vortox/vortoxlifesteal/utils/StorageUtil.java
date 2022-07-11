@@ -5,9 +5,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import live.vortox.vortoxlifesteal.VortoxLifeSteal;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,22 +20,27 @@ public class StorageUtil {
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static File file;
+    private static List<PlayerStorage> playerList;
 
-    private static void save(List<PlayerStorage> players) throws IOException {
-        if (players == null)
+    private static void save() {
+
+        if (playerList == null)
             return;
 
-        Writer writer = new FileWriter(file, false);
-        gson.toJson(players, writer);
+        try {
+            FileWriter writer = new FileWriter(file);
+            gson.toJson(playerList, writer);
 
-        writer.close();
+            writer.close();
+        } catch (IOException e) {
+            Bukkit.getLogger().warning("Unable to save to players.json!");
+        }
+
     }
 
-    public static void updatePlayer(Player player, String attribute, String change) throws IOException {
+    public static void updatePlayer(OfflinePlayer player, String attribute, String change) {
 
-        List<PlayerStorage> playerList = returnPlayerList();
-
-        PlayerStorage user = findPlayer(playerList, player);
+        PlayerStorage user = findPlayer(player);
 
         if (user == null)
             return;
@@ -49,21 +58,47 @@ public class StorageUtil {
             return;
         }
 
-        save(playerList);
+        save();
+    }
+
+    public static void updatePlayer(PlayerStorage player, String attribute, String change) {
+
+        for (PlayerStorage temp : playerList) {
+            if (temp.getUuid().equals(player.getUuid())) {
+                player = temp;
+                break;
+            }
+        }
+
+        if (attribute.equalsIgnoreCase("username"))
+            player.setUsername(change);
+        else if (attribute.equalsIgnoreCase("hearts"))
+            player.setHearts(Double.parseDouble(change));
+        else if (attribute.equalsIgnoreCase("eliminated"))
+            player.setEliminated(Boolean.parseBoolean(change));
+        else if (attribute.equalsIgnoreCase("revivalHearts"))
+            player.setRevivalHearts(Double.parseDouble(change));
+        else {
+            Bukkit.getLogger().warning("Could not find command " + attribute + ".");
+            return;
+        }
+
+        save();
 
     }
 
     public static List<PlayerStorage> returnPlayerList() throws IOException {
-        Reader reader = new FileReader(file);
-
         Type listofPlayerStorage = new TypeToken<ArrayList<PlayerStorage>>() {}.getType();
-        return gson.fromJson(reader, listofPlayerStorage);
+
+        return gson.fromJson(new FileReader(file), listofPlayerStorage);
     }
 
-    public static PlayerStorage findPlayer(List<PlayerStorage> playerList, Player player) {
+    public static PlayerStorage findPlayer(OfflinePlayer player) {
 
-        if (playerList == null)
+        if (playerList == null) {
+            Bukkit.getLogger().warning("Playerlist is null!");
             return null;
+        }
 
         for (PlayerStorage index : playerList) {
             if (index.getUuid().equals(player.getUniqueId())) {
@@ -74,10 +109,12 @@ public class StorageUtil {
         return null;
     }
 
-    public static PlayerStorage findPlayer(List<PlayerStorage> playerList, String name) {
+    public static PlayerStorage findPlayer(String name) {
 
-        if (playerList == null)
+        if (playerList == null) {
+            Bukkit.getLogger().warning("Playerlist is null!");
             return null;
+        }
 
         for (PlayerStorage index : playerList) {
             if (index.getUsername().equalsIgnoreCase(name)) {
@@ -88,28 +125,32 @@ public class StorageUtil {
         return null;
     }
 
-    public static void addPlayer(Player player) throws IOException {
-        List<PlayerStorage> playerList = returnPlayerList();
+    public static void addPlayer(Player player) {
 
         if (playerList == null)
             playerList = new ArrayList<>();
 
-        if (findPlayer(playerList, player) != null)
+        if (findPlayer(player) != null)
             return;
 
         PlayerStorage user = new PlayerStorage(player);
 
         playerList.add(user);
 
-        save(playerList);
+        Bukkit.getLogger().info("Added " + player.getName() + " to the list!");
+
+        save();
     }
 
     public static void createFile(String name) {
-        File newFile = new File(VortoxLifeSteal.getPlugin().getDataFolder().getAbsolutePath() + "/" + name);
-        file = newFile;
+        File newFile = new File(VortoxLifeSteal.getPlugin().getDataFolder().getAbsolutePath(), name);
+
         try {
-            if (!newFile.createNewFile())
+            if (newFile.createNewFile())
                 Bukkit.getLogger().info("Created file!");
+
+            file = newFile;
+            playerList = returnPlayerList();
         } catch (IOException e) {
             Bukkit.getLogger().warning("Unable to create file!");
         }

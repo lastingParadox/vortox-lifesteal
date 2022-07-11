@@ -4,14 +4,14 @@ import live.vortox.vortoxlifesteal.VortoxLifeSteal;
 import live.vortox.vortoxlifesteal.utils.ElimUtil;
 import live.vortox.vortoxlifesteal.utils.PlayerStorage;
 import live.vortox.vortoxlifesteal.utils.StorageUtil;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.io.IOException;
 
 public class ReviveCommand implements CommandExecutor {
 
@@ -63,21 +63,14 @@ public class ReviveCommand implements CommandExecutor {
                 }
                 else {
                     OfflinePlayer target;
-                    try {
-                        PlayerStorage temp = StorageUtil.findPlayer(StorageUtil.returnPlayerList(), args[0]);
+                    PlayerStorage temp = StorageUtil.findPlayer(args[0]);
 
-                        if (temp == null) {
-                            player.sendMessage(ChatColor.RED + "The provided player does not exist!");
-                            return true;
-                        }
-
-                        target = Bukkit.getOfflinePlayer(temp.getUuid());
-
-                    } catch (IOException e) {
-                        player.sendMessage(ChatColor.RED + "An internal server error occurred when trying to execute this command.");
-                        Bukkit.getLogger().warning("Unable to access player storage.");
+                    if (temp == null) {
+                        player.sendMessage(ChatColor.RED + "The provided player does not exist!");
                         return true;
                     }
+
+                    target = Bukkit.getOfflinePlayer(temp.getUuid());
 
                     ElimUtil.revivePlayer(target, amount);
 

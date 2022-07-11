@@ -2,15 +2,12 @@ package live.vortox.vortoxlifesteal.commands;
 
 import live.vortox.vortoxlifesteal.items.ItemManager;
 import live.vortox.vortoxlifesteal.utils.StorageUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.io.IOException;
 
 public class WithdrawalCommand implements CommandExecutor {
 
@@ -29,11 +26,7 @@ public class WithdrawalCommand implements CommandExecutor {
             if (args.length == 0) {
                 player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health - 2);
 
-                try {
-                    StorageUtil.updatePlayer(player, "hearts", String.valueOf((health - 2)/2));
-                } catch (IOException e) {
-                    Bukkit.getLogger().warning("Unable to update " + player.getName() + " hearts in storage.");
-                }
+                StorageUtil.updatePlayer(player, "hearts", String.valueOf((health - 2)/2));
 
                 player.getInventory().addItem(ItemManager.heart);
                 player.sendMessage(ChatColor.DARK_PURPLE + "You convert a " + ChatColor.LIGHT_PURPLE + "heart "
@@ -57,11 +50,7 @@ public class WithdrawalCommand implements CommandExecutor {
 
                 player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health - amount);
 
-                try {
-                    StorageUtil.updatePlayer(player, "hearts", String.valueOf((health - amount)/2));
-                } catch (IOException e) {
-                    Bukkit.getLogger().warning("Unable to update " + player.getName() + " hearts in storage.");
-                }
+                StorageUtil.updatePlayer(player, "hearts", String.valueOf((health - amount)/2));
 
                 for (int i = 0; i < (amount/2); i++) {
                     player.getInventory().addItem(ItemManager.heart);

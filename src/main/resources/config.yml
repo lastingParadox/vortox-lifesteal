@@ -25,8 +25,35 @@ automatic-health: true
 # Disabled by default to prevent inaccessible items in raids/battles.
 allow-ender-hearts: false
 # Determines the punishment given to eliminated players.
-# - "spectator" = Puts the eliminated player into spectator mode.
-# - "banned" = Bans the eliminated player. Default.
+# - "banned" = Bans and kicks the eliminated player. Default.
+# - "hardcore" = Bans the eliminated player, but does not kick them, rather putting them into spectator mode.
+# - "spectator" = Puts the eliminated player into spectator mode without banning them.
 elimination-type: 'banned'
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Items and Recipes
+# Determines the crafting method for hearts.
+# - "fragment-#" = Shapeless recipe that requires # fragments to craft, whereas # is a number between 1 and 9.
+#    - If a number is not provided, the recipe defaults to 4 fragments to craft.
+# - "smp" = Mimics the recipe from a certain popular SMP.
+# - "custom-shaped" = Custom shaped recipe. To be implemented eventually.
+# - "custom-shapeless" = Custom shapeless recipe. To be implemented eventually.
+# - "none" = Hearts are unavailable to craft. Default.
+heart-crafting: 'none'
+
+custom:
+  # If true, permits the use of heart fragments in a custom recipe.
+  # Otherwise, the recipe will not work if heart fragments are used.
+  uses-heart-fragments: false
+  type: 'shaped'
+#     List of recipe values (enums) available at https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+#     Example: Diamond Pickaxe Recipe
+#     - DIAMOND DIAMOND DIAMOND
+#     - AIR STICK AIR
+#     - AIR STICK AIR
+#     If uses-heart-fragments is true, use "HEART_FRAGMENT" to specify a heart fragment.
+  shaped:
+    - AIR AIR AIR
+    - AIR AIR AIR
+    - AIR AIR AIR
+

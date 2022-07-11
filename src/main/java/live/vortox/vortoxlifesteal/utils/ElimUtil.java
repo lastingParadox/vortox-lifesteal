@@ -5,31 +5,32 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 
-import java.io.IOException;
-
 public class ElimUtil {
 
-    public static VortoxLifeSteal plugin;
+    public static final String ELIMINATION_TYPE = VortoxLifeSteal.getPlugin().getConfig().getString("elimination-type");
 
     public static void eliminatePlayer(Player player) {
-        String eliminationType = plugin.getConfig().getString("elimination-type");
-        try {
-            StorageUtil.updatePlayer(player, "eliminated", "true");
-        } catch (IOException e) {
-            Bukkit.getLogger().warning("Unable to update " + player.getName() + "'s eliminated status in storage.");
-        }
+        StorageUtil.updatePlayer(player, "eliminated", "true");
 
-        if (eliminationType.equalsIgnoreCase("spectator")) {
+        if (ELIMINATION_TYPE.equalsIgnoreCase("spectator")) {
             player.setGameMode(GameMode.SPECTATOR);
             player.sendMessage(ChatColor.RED + "You lost all of your max health! You will be a "
                     + "spectator until someone revives you.");
         }
         else {
+            if (ELIMINATION_TYPE.equalsIgnoreCase("hardcore")) {
+                player.setGameMode(GameMode.SPECTATOR);
+                player.sendMessage(ChatColor.RED + "You lost all of your max health! You have been banished, but"
+                        + " you may roam this realm as a spectator until you disconnect.");
+            }
+            else
+                player.kickPlayer(ChatColor.RED + "You died and lost all of your max health!");
             Bukkit.getBanList(BanList.Type.NAME).addBan(player.getName(),
-                    "You died and lost all of your max health!", null, "");
+                    ChatColor.RED + "You died and lost all of your max health!", null, "");
         }
     }
 
+    //Only works in the case of an online spectator.
     public static void revivePlayer(Player player, double amount) {
 
         if (amount == 0)
@@ -37,13 +38,10 @@ public class ElimUtil {
 
         player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(amount * 2);
 
-        try {
-            StorageUtil.updatePlayer(player, "hearts", String.valueOf(amount));
-            StorageUtil.updatePlayer(player, "eliminated", "false");
-
-        } catch (IOException e) {
-            Bukkit.getLogger().warning("Unable to update " + player.getName() + "'s eliminated status in storage.");
-        }
+        PlayerStorage temp = StorageUtil.findPlayer(player);
+        StorageUtil.updatePlayer(temp, "hearts", String.valueOf(amount));
+        StorageUtil.updatePlayer(temp, "eliminated", "false");
+        StorageUtil.updatePlayer(temp, "revivalHearts", "0");
 
         player.setGameMode(GameMode.SURVIVAL);
         player.sendMessage(ChatColor.GREEN + "You have been revived! You are now in survival.");
@@ -54,10 +52,11 @@ public class ElimUtil {
         if (amount == 0)
             amount = 1;
 
-        try {
-            StorageUtil.updatePlayer((Player) player, "revivalHearts", String.valueOf(amount));
-        } catch (IOException e) {
-            Bukkit.getLogger().warning("Unable to revive " + player.getName() + " in storage.");
+        StorageUtil.updatePlayer(player, "revivalHearts", String.valueOf(amount));
+
+        if (ELIMINATION_TYPE.equalsIgnoreCase("banned")) {
+            Bukkit.getBanList(BanList.Type.NAME).pardon(player.getName());
         }
+
     }
 }
