@@ -58,8 +58,6 @@ public class PlayerJoinListener implements Listener {
             }
             StorageUtil.updatePlayer(storedPlayer, "hearts", String.valueOf(originalMax + storedPlayer.getRevivalHearts()));
             StorageUtil.updatePlayer(storedPlayer, "revivalHearts", "0");
-
-
         }
 
         if (!storedPlayer.getUsername().equals(player.getName())) {

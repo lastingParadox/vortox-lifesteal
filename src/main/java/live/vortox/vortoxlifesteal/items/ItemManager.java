@@ -26,6 +26,7 @@ public class ItemManager {
         item.addUnsafeEnchantment(Enchantment.LUCK, 1);
 
         ItemMeta meta = item.getItemMeta();
+        meta.setCustomModelData(223);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.setDisplayName("§dHeart");
         List<String> lore = new ArrayList<>();
@@ -45,6 +46,7 @@ public class ItemManager {
         item.addUnsafeEnchantment(Enchantment.LUCK, 1);
 
         ItemMeta meta = item.getItemMeta();
+        meta.setCustomModelData(224);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.setDisplayName("§dHeart Fragment");
         List<String> lore = new ArrayList<>();

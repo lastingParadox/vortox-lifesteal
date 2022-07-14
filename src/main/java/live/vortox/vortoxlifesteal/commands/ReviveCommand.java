@@ -30,6 +30,7 @@ public class ReviveCommand implements CommandExecutor {
             if (args.length == 0) {
                 player.sendMessage(ChatColor.RED + "You need to provide the player to revive!");
                 player.sendMessage(example);
+                return true;
 
             }
             else {
@@ -54,6 +55,7 @@ public class ReviveCommand implements CommandExecutor {
                         return true;
                     } else if (target.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() > 0) {
                         player.sendMessage(ChatColor.RED + target.getName() + " cannot be revived, as they are not eliminated!");
+                        return true;
                     }
 
                     ElimUtil.revivePlayer(target, amount);
